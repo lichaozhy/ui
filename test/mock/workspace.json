@@ -1,0 +1,30 @@
+{
+	"activeIndex": 0,
+	"desktopList": [
+		{
+			"meta": {
+				"name": "default"
+			},
+			"rendererList": [
+				{
+					"type": "icon",
+					"meta": {
+
+					}
+				},
+				{
+					"type": "widget",
+					"meta": {
+
+					}
+				}
+			]
+		},
+		{
+			"meta": {
+				"name": "test2"
+			}
+
+		}
+	]
+}
