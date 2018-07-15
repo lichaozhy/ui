@@ -4,11 +4,10 @@
 			active: state === 1
 		}"
 		:style="{
-			left: `${offset.now.x}px`,
-			top: `${offset.now.y}px`
+			position: isHandle ? 'static' : 'relative',
+			left: `${offset.x}px`,
+			top: `${offset.y}px`
 		}"
-		@vd-docking-response=""
-		@vd-docked-response=""
 		@mousedown="onMousedown($event)"
 		@mousemove="onMousemove($event)"
 		@mouseup="onMouseup($event)">
@@ -18,15 +17,7 @@
 </template>
 
 <script>
-const STATE = {
-	IDLE: -1,
-	READY: 0,
-	MOVING: 1,
-};
-
-function createDragEvent() {
-
-}
+import { STATE, createDockQuery } from '../utils';
 
 export default {
 	props: {
@@ -41,12 +32,22 @@ export default {
 		delay: {
 			default: 100,
 			type: Number
+		},
+		isHandle: {
+			default: false,
+			type: Boolean
+		},
+		value: {
+			default() {
+				return  {
+					x: 0,
+					y: 0
+				};
+			},
+			type: Object
 		}
 	},
 	methods: {
-		revert() {
-
-		},
 		cancel() {
 			clearTimeout(this.delayTimer);
 			this.delayTimer = null;
@@ -69,14 +70,8 @@ export default {
 			if (this.state !== STATE.MOVING) {
 				return;
 			}
-			
-			this.move(event);
 
-			const query = {
-				accepted: null
-			};
-
-			// element.dispatchEvent('docking-query');
+			this.move(event)
 		},
 		onMouseup(event) {
 			if (this.state === STATE.READY) {
@@ -90,25 +85,59 @@ export default {
 			this.end(event);
 		},
 		start(event) {
+			window.getSelection().removeAllRanges();
+
 			this.pointer.start.x = event.clientX;
 			this.pointer.start.y = event.clientY;
-			this.offset.last.x = this.offset.now.x;
-			this.offset.last.y = this.offset.now.y;
+			this.last.x = this.offset.x - 0;
+			this.last.y = this.offset.y - 0;
 
 			this.state = STATE.MOVING;
 
-			this.$emit('vd-drag-start');
+			this.$emit('vd-drag-start', this.offset);
+			this.$emit('input', this.offset);
 		},
 		move(event) {
-			this.offset.now.x = this.offset.last.x + event.clientX - this.pointer.start.x,
-			this.offset.now.y = this.offset.last.y + event.clientY - this.pointer.start.y
+			this.setOffset({
+				x: this.last.x - 0 + event.clientX - this.pointer.start.x,
+				y: this.last.y - 0 + event.clientY - this.pointer.start.y
+			});
 
-			this.$emit('vd-drag-move');
+			this.setOver(event.clientX, event.clientY);
+
+			this.requestDockingQuery();
+
+			this.$emit('vd-drag-move', this.offset);
+			this.$emit('input', this.offset);
 		},
 		end() {
 			this.cancel();
+			this.throttle = null;
 			
-			this.$emit('vd-drag-end');
+			this.$emit('vd-drag-end', this.offset);
+			this.$emit('input', this.offset);
+		},
+		setOffset({ x, y }) {
+			this.offset.x = x;
+			this.offset.y = y;
+		},
+		setOver(x, y) {
+			const { style } = this.$el;
+
+			style.display = 'none';
+			this.over = document.elementFromPoint(x, y) || null;
+			style.display = '';
+		},
+		requestDockingQuery() {
+			if (this.over === null) {
+				return;
+			}
+
+			const query = {
+				accepted: null
+			};
+
+			this.over.dispatchEvent(createDockQuery());
 		}
 	},
 	data() {
@@ -116,23 +145,21 @@ export default {
 			delayTimer: null,
 			isAccepted: false,
 			state: STATE.IDLE,
+			last: {
+				x: 0,
+				y: 0
+			},
 			offset: {
-				last: {
-					x: 0,
-					y: 0
-				},
-				now: {
-					x: 0,
-					y: 0
-				}
+				x: 0,
+				y: 0
 			},
 			pointer: {
 				start: {
 					x: 0,
 					y: 0
-				},
-				over: null
-			}
+				}
+			},
+			over: null
 		};
 	}
 }

@@ -1,6 +1,6 @@
 <template>
 	<div class="vd-ui-droppable"
-		@docking-query="onQuery()">
+		@dock-query="onQuery()">
 		<slot />
 	</div>
 </template>
@@ -12,6 +12,8 @@ export default {
 			const query = {
 				accept: false
 			};
+
+			console.log(111)
 
 			this.$emit('vd-docking-query', query);
 		},

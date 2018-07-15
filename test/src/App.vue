@@ -1,27 +1,55 @@
 <template>
   <div id="test-app">
+    {{start}}
+    {{move}}
+    {{end}}
     <vd-ui-droppable id="docker">
 
     </vd-ui-droppable>
 
-    <div id="content">
-      <vd-ui-draggable
-        @vd-drag-start="test()">
-        APP-TEST
-      </vd-ui-draggable>
-    </div>
+    <!-- <div id="content"
+      style="position:relative"
+      :style="{
+        left: `${pos.x}px`,
+        top: `${pos.y}px`
+      }">
+    </div> -->
+<!--     
+    <vd-ui-draggable
+      id="content"
+      ref="drag"
+      @vd-dock-allow=""
+      @vd-dock=""
+      @vd-drag-start="start++"
+      @vd-drag-move="move++"
+      @vd-drag-end="setPos($event)">
+      APP-TEST
+    </vd-ui-draggable> -->
+
+    <test
+      @vd-drag-start="start++"
+      @vd-drag-move="move++">test</test>
   </div>
 </template>
 
 <script>
+import Test from './Element';
 import mockWS from '../mock/workspace.json';
 
 export default {
   data() {
     return {
-      mockWS,
-      haha: 1
+      start: 0,
+      move: 0,
+      end: 0,
+      pos: {
+        x: 0,
+        y: 0
+      }
     }
+  },
+  components: {
+    Test
   },
   methods: {
     test() {
@@ -31,19 +59,3 @@ export default {
 }
 </script>
 
-<style lang="less">
-#docker {
-  background: #f0f0f0;
-  width: 1024px;
-  height: 768px;
-  top: 0;
-  left: 0;
-}
-
-#content {
-  width: 64px;
-  height: 64px;
-  background: red;
-  opacity: .4;
-}
-</style>
