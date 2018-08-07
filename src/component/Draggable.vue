@@ -124,7 +124,12 @@ export default {
 				y: this.last.y - 0 + event.clientY - this.pointer.start.y
 			});
 
-			this.request('dock-query-request');
+			const { received, response } = this.request('dock-query-request');
+
+			if (received) {
+				this.$emit('vd-dock-query-respond', response);
+			}
+
 			this.$emit('vd-drag-move', this.offset);
 			this.$emit('input', this.offset);
 		},
@@ -132,7 +137,12 @@ export default {
 			this.cancel();
 			this.throttle = null;
 			
-			this.request('dock-request')
+			const { received, response } = this.request('dock-request');
+			
+			if (received) {
+				this.$emit('vd-dock-respond', response);
+			}
+			
 			this.$emit('vd-drag-end', this.offset);
 			this.$emit('input', this.offset);
 		},
@@ -164,9 +174,12 @@ export default {
 		request(typeName) {
 			const event = createDockQuery(typeName, this.data);
 
+			event.received = false;
+			event.response = {};
+
 			this.getOver().dispatchEvent(event);
 
-			return event.response;
+			return event;
 		}
 	},
 	data() {
@@ -195,10 +208,13 @@ export default {
 			},
 		};
 	},
+	watch: {
+		value(val) {
+			this.offset = val;
+		}
+	},
 	mounted() {
 		this.$offsetParent = this.$el.offsetParent;
-
-		console.log(this.$offsetParent);
 	}
 }
 </script>

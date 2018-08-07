@@ -21,16 +21,14 @@ export default {
 	},
 	methods: {
 		respondDockQuery(event) {
-			this.$emit('vd-dock-query', event.detail);
+			event.received = true;
 
-			event.response = {
-				accepted: this.check(event.detail)
-			};
+			this.$emit('vd-dock-query', event);
 		},
-		tryDock({ detail }) {
-			if (this.check(detail)) {
-				this.$emit('vd-dock', detail);
-			}
+		tryDock(event) {
+			event.received = true;
+
+			this.$emit('vd-dock', event);
 		}
 	}
 }
