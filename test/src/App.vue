@@ -3,10 +3,32 @@
     {{start}}
     {{move}}
     {{end}}
-    <vd-ui-droppable id="docker">
-
+    <vd-ui-droppable
+      style="position:relative"
+      @vd-dock-query="move++"
+      @vd-dock="end++"
+      id="docker">
+      <div style="height:100%;width:100%"></div>
+      
     </vd-ui-droppable>
 
+    <div class="element"
+      :style="{
+        left: `${pos.x}px`,
+        top: `${pos.y}px`
+      }">
+      <vd-ui-draggable
+        v-model="pos"
+        is-handle
+        id="content"
+        ref="drag"
+        @vd-dock-allow=""
+        @vd-dock="">
+        <slot />
+        <input type="number" v-model="pos.x" />
+        <input type="number" v-model="pos.y" />
+      </vd-ui-draggable>
+    </div>
     <!-- <div id="content"
       style="position:relative"
       :style="{
@@ -26,9 +48,9 @@
       APP-TEST
     </vd-ui-draggable> -->
 
-    <test
+    <!-- <test
       @vd-drag-start="start++"
-      @vd-drag-move="move++">test</test>
+      @vd-drag-move="move++">test</test> -->
   </div>
 </template>
 
@@ -58,4 +80,11 @@ export default {
   }
 }
 </script>
+
+<style>
+.element {
+  position: absolute;
+}
+</style>
+
 

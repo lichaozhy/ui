@@ -1,26 +1,36 @@
 <template>
 	<div class="vd-ui-droppable"
-		@dock-query="onQuery()">
+		@dock-query-request.stop="respondDockQuery($event)"
+		@dock-request.stop="tryDock($event)">
 		<slot />
 	</div>
 </template>
 
 <script>
 export default {
+	data() {
+		return {
+			isBusy: false
+		}
+	},
+	props: {
+		check: {
+			type: Function,
+			default: () => false
+		}
+	},
 	methods: {
-		onQuery() {
-			const query = {
-				accept: false
+		respondDockQuery(event) {
+			this.$emit('vd-dock-query', event.detail);
+
+			event.response = {
+				accepted: this.check(event.detail)
 			};
-
-			console.log(111)
-
-			this.$emit('vd-docking-query', query);
 		},
-		onDocked() {
-			const data = {};
-
-			this.$emit('vd-docked', data);
+		tryDock({ detail }) {
+			if (this.check(detail)) {
+				this.$emit('vd-dock', detail);
+			}
 		}
 	}
 }
