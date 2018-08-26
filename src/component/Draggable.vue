@@ -1,17 +1,15 @@
 <template>
 	<div class="vd-ui-draggable"
-		:class="{
-			active: state === 1
-		}"
+		:class="{ active: state === 1 }"
 		:style="{
-			position: isHandle ? 'static' : 'absolute',
 			left: `${offset.x}px`,
 			top: `${offset.y}px`
 		}"
-		:disabled="disabled"
 		@mousedown="onMousedown($event)"
 		@mousemove="onMousemove($event)"
-		@mouseup="onMouseup($event)">
+		@mouseup="onMouseup($event)"
+		:disabled="disabled">
+
 		<slot />
 	</div>
 </template>
@@ -31,17 +29,9 @@ export default {
 			default: false,
 			type: Boolean
 		},
-		docked: {
-			default: false,
-			type: Boolean
-		},
 		delay: {
-			default: 100,
+			default: 50,
 			type: Number
-		},
-		isHandle: {
-			default: false,
-			type: Boolean
 		},
 		value: {
 			default() {
@@ -128,9 +118,10 @@ export default {
 
 			if (received) {
 				this.$emit('vd-dock-query-respond', response);
+			} else {
+				this.$emit('vd-drag-move', response);
 			}
 
-			this.$emit('vd-drag-move', this.offset);
 			this.$emit('input', this.offset);
 		},
 		end(event) {
@@ -141,9 +132,10 @@ export default {
 			
 			if (received) {
 				this.$emit('vd-dock-respond', response);
+			} else {
+				this.$emit('vd-drag-end', response);
 			}
 			
-			this.$emit('vd-drag-end', this.offset);
 			this.$emit('input', this.offset);
 		},
 		setOffset({ x, y }) {
@@ -180,6 +172,9 @@ export default {
 			this.getOver().dispatchEvent(event);
 
 			return event;
+		},
+		test() {
+			console.log(1222)
 		}
 	},
 	data() {
