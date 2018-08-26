@@ -1,8 +1,8 @@
 import Vue from 'vue';
 import App from './src/App';
-import DesktopUI from '../';
+import { vdUiCore } from '../';
 
-Vue.use(DesktopUI);
+Vue.use(vdUiCore);
 
 const app = new Vue(App);
 

@@ -1,56 +1,36 @@
 <template>
   <div id="test-app">
-    {{start}}
-    {{move}}
-    {{end}}
-    <vd-ui-droppable
-      style="position:relative"
-      @vd-dock-query="move++"
-      @vd-dock="end++"
-      id="docker">
-      <div style="height:100%;width:100%"></div>
-      
-    </vd-ui-droppable>
+    <ul>
+      <li>fdafasfsafsafaffsafa</li>
+      <li>fdafasfsafsafaffsafa</li>
+      <li>fdafasfsafsafaffsafa</li>
+      <li>fdafasfsafsafaffsafa</li>
+      <li>fdafasfsafsafaffsafa</li>
+      <li>fdafasfsafsafaffsafa</li>
+      <li>fdafasfsafsafaffsafa</li>
+      <li>fdafasfsafsafaffsafa</li>
+      <li>fdafasfsafsafaffsafa</li>
+      <li>fdafasfsafsafaffsafa</li>
+    </ul>
+    {{pos}}
 
-    <div class="element"
-      :style="{
-        left: `${pos.x}px`,
-        top: `${pos.y}px`
-      }">
-      <vd-ui-draggable
-        v-model="pos"
-        is-handle
-        id="content"
-        ref="drag"
-        @vd-dock-allow=""
-        @vd-dock="">
-        <slot />
-        <input type="number" v-model="pos.x" />
-        <input type="number" v-model="pos.y" />
-      </vd-ui-draggable>
-    </div>
-    <!-- <div id="content"
-      style="position:relative"
-      :style="{
-        left: `${pos.x}px`,
-        top: `${pos.y}px`
-      }">
-    </div> -->
-<!--     
-    <vd-ui-draggable
-      id="content"
-      ref="drag"
-      @vd-dock-allow=""
-      @vd-dock=""
-      @vd-drag-start="start++"
-      @vd-drag-move="move++"
-      @vd-drag-end="setPos($event)">
-      APP-TEST
-    </vd-ui-draggable> -->
+    <test
+      vd-handle-required
+      v-model="pos"
+      @vd-dock="dock($event)"
+      @vd-dock-query="query($event)"
+      @vd-drag-start="start($event)"
+      @vd-drag-move="move($event)"
+      @vd-drag-end="end($event)" />
 
-    <!-- <test
-      @vd-drag-start="start++"
-      @vd-drag-move="move++">test</test> -->
+    <test
+      class="request"
+      :vd-drag-data="{abc:1}"
+      @vd-dock-query-respond="dockQueryRes($event)"
+      @vd-dock-respond="dockRes($event)"
+      @vd-drag-start="start($event)"
+      @vd-drag-move="move($event)"
+      @vd-drag-end="end($event)" />
   </div>
 </template>
 
@@ -61,9 +41,6 @@ import mockWS from '../mock/workspace.json';
 export default {
   data() {
     return {
-      start: 0,
-      move: 0,
-      end: 0,
       pos: {
         x: 0,
         y: 0
@@ -74,9 +51,34 @@ export default {
     Test
   },
   methods: {
-    test() {
-      console.log('start drag')
+    start(event) {
+      console.log('start', event);
+    },
+    move(event) {
+      console.log('move', event);
+    },
+    end(event) {
+      console.log('end', event);
+    },
+    query({ response, detail }) {
+      console.log('query', response, detail);
+
+      response.test = detail.abc + 5;
+    },
+    dock({ response, detail }) {
+      console.log('dock', response, detail);
+
+      response.test = detail.abc + 5;
+    },
+    dockRes(response) {
+      console.log('dock-res', response)
+    },
+    dockQueryRes(response) {
+      console.log('dock-query-res', response)
     }
+  },
+  mounted() {
+    console.log(this)
   }
 }
 </script>
@@ -84,6 +86,11 @@ export default {
 <style>
 .element {
   position: absolute;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
 }
 </style>
 

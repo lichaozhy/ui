@@ -1,36 +1,21 @@
 <template>
-  <vd-ui-draggable
-    v-model="pos"
-    id="content"
-    ref="drag"
-    @vd-dock-allow=""
-    @vd-dock=""
-    @vd-drag-end="setPos($event)">
-    <slot />
-    <input type="number" v-model="pos.x" />
-    <input type="number" v-model="pos.y" />
-  </vd-ui-draggable>
+
+<div id="content">
+  <p v-vd-handle>hei</p>
+</div>
+
 </template>
 
 <script>
+import { vdDraggable, vdDroppable } from '../../';
+
 export default {
-  data() {
-    return {
-      pos: {
-        x: 0,
-        y: 0
-      }
-    }
-  },
-  methods: {
-    setPos({ x, y }) {
-      this.pos.x = x;
-      this.pos.y = y;
-    }
-  }
+  mixins: [
+    vdDraggable,
+    vdDroppable
+  ]
 }
 </script>
-
 
 <style lang="less">
 #docker {

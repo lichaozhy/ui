@@ -1,12 +1,11 @@
 import './src/style.less';
-import Draggable from './src/component/Draggable';
-import Droppable from './src/component/Droppable';
+import draggable from './src/mixins/draggable';
+import droppable from './src/mixins/droppable';
+import handle from './src/directive/handle';
 
-export default function install(Vue) {
-	Vue.component('SppUiDraggable', Draggable);
-	Vue.component('SppUiDroppable', Droppable);
-
-	Vue.directive('draggable-hanele', {
-
-	});
+export function vdUiCore(Vue) {
+	Vue.directive('vdHandle', handle);
 }
+
+export const vdDraggable = draggable;
+export const vdDroppable = droppable;
