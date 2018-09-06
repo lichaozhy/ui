@@ -1,7 +1,7 @@
-export const CustomEvent = (function () {
+(function () {
 
 	if (typeof window.CustomEvent === 'function') {
-		return CustomEvent;
+		return false;
 	}
 
 	function CustomEvent(event, params) {
@@ -18,6 +18,5 @@ export const CustomEvent = (function () {
 
 	CustomEvent.prototype = window.Event.prototype;
 
-	return CustomEvent;
-
+	window.CustomEvent = CustomEvent;
 }());

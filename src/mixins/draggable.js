@@ -58,8 +58,9 @@ class VdDraggableController {
 		const setOffset = event => {
 			const originOffset = computeElementOffset({
 				pointerOrigin: this.position.pointer.origin,
-				pointerPresent: this.position.pointer.present = getPointerClientPosition(event),
-				elementOrigin: this.position.element.origin
+				elementOrigin: this.position.element.origin,
+				pointerPresent: this.position.pointer.present =
+					getPointerClientPosition(event)
 			});
 
 			const offset = constraintFilter({
