@@ -10,9 +10,19 @@ app.$mount('#app');
 
 
 import DraggableController from '../src/ui/draggable';
+import ResizableController from '../src/ui/resizable';
+
 import asHandle from '../src/ui/utils/handle';
 const test = document.createElement('div');
 const test2 = document.createElement('div');
+
+const iframe = document.createElement('iframe');
+
+test.appendChild(iframe)
+iframe.style.width = '100%';
+iframe.style.height = '100%';
+
+iframe.src = 'http://baidu.com';
 
 test.style.position = 'absolute';
 test.style.width = '200px';
@@ -25,6 +35,24 @@ test2.style.width = '200px';
 test2.style.height = '200px';
 test2.style.backgroundColor = 'green';
 document.body.appendChild(test2);
+
+// test2.addEventListener('vd-dragover', function (event) {
+// 	console.log(event)
+// });
+
+test2.addEventListener('vd-dragleave', function (event) {
+	console.log(event)
+});
+
+test2.addEventListener('vd-dragenter', function (event) {
+	console.log(event)
+});
+
+test2.addEventListener('vd-drop', function (event) {
+	console.log(event)
+});
+
+new ResizableController(test);
 
 
 const handle = document.createElement('div');
@@ -51,9 +79,5 @@ dc.setOption('constraint', 'parent');
 dc.setOption('handleRequired', true);
 
 const dc2 = new DraggableController(test2);
-dc2.setOption('axis', null);
+// dc2.setOption('axis', 'x');
 dc2.setOption('constraint', 'parent');
-
-document.addEventListener('drag-start', console.log)
-document.addEventListener('drag-move', console.log)
-document.addEventListener('drag-end', console.log)

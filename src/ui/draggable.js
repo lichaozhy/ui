@@ -2,6 +2,11 @@ import Controller from './utils/controller';
 import './utils/event';
 
 const STATE = { IDLE: -1, READY: 0, MOVING: 1 };
+let dragover = document;
+
+function noOp() {
+	return;
+}
 
 function DefaultOptions() {
 	return {
@@ -9,23 +14,30 @@ function DefaultOptions() {
 		constraint: null,
 		delay: 50,
 		threshold: 0,
-		axis: null
+		axis: null,
+		dataFactory: noOp,
+		withDrop: true
 	};
 }
 
-function DragEvent(typeName, offset) {
-	return new CustomEvent(typeName, {
+function VdDragEvent(typeName, data, mouseEvent) {
+	return Object.assign(new CustomEvent(typeName, {
 		bubbles: true,
 		cancelable: true,
-		detail: {
-			offset
+		detail: { data }
+	}), {
+		clientX: mouseEvent.clientX,
+		clientY: mouseEvent.clientY,
+		getData() {
+			return this.detail.data;
 		}
 	});
 }
 
 export default class DraggableController extends Controller {
-	constructor(element) {
+	constructor(element, options = {}) {
 		super(element, DefaultOptions());
+		this.initOptions(options);
 
 		this.position = {
 			pointer: {
@@ -39,13 +51,14 @@ export default class DraggableController extends Controller {
 		
 		this.$timer = null;
 		this.$state = STATE.IDLE;
+		this.$dataFactory = this.getOption('dataFactory');
 
 		this.$onMousedown = event => {
 			if (this.$state !== STATE.IDLE) {
 				return this.$cancel();
 			}
 
-			if (this.$options.handleRequired && !event.__VD_HANDLE__) {
+			if (this.getOption('handleRequired') && !event.__VD_HANDLE__) {
 				return;
 			}
 			
@@ -55,7 +68,7 @@ export default class DraggableController extends Controller {
 			this.$timer = setTimeout(() => {
 				this.$state = STATE.MOVING;
 				this.$start(event);
-			}, this.$options.delay);
+			}, this.getOption('delay'));
 		};
 
 		this.$onMousemove = event => {
@@ -67,14 +80,14 @@ export default class DraggableController extends Controller {
 		};
 
 		this.$onMouseup = event => {
-			event.stopPropagation();
+			// event.stopPropagation();
 
 			if (this.$state === STATE.MOVING) {
 				this.$end(event);
 			}
 
 			this.$cancel();
-		}
+		};
 		
 		this.element.addEventListener('mousedown', this.$onMousedown);
 		this.element.addEventListener('mouseup', this.$onMouseup);
@@ -84,33 +97,67 @@ export default class DraggableController extends Controller {
 		return this.element.offsetParent;
 	}
 
-	$getDestination() {
-		return getElementFromPoint(this.position.pointer.present, this.element);
+	$dispatch(typeName, element, mouseEvent) {
+		const dragEvent = VdDragEvent(
+			typeName,
+			this.$dataFactory(this),
+			mouseEvent
+		);
+
+		element.dispatchEvent(dragEvent);
+	}
+
+	$updateDragoverElement(event) {
+		const newDragover = getElementFromPoint(
+			this.position.pointer.present,
+			this.element
+		) || document;
+
+		if (newDragover === dragover) {
+			this.$dispatch('vd-dragover', dragover, event);
+		} else {
+			this.$dispatch('vd-dragleave', dragover, event);
+			this.$dispatch('vd-dragenter', newDragover, event);
+
+			dragover = newDragover;
+		}
 	}
 
 	$start(event) {
 		const { pointer, element } = this.position;
-		const offset = element.origin = getElementOffsetPosition(this.element);
+		element.origin = getElementOffsetPosition(this.element);
 
 		pointer.origin = getPointerClientPosition(event);
+		this.element.style.zIndex = Number.MAX_SAFE_INTEGER;
 
 		this.element.addEventListener('mousemove', this.$onMousemove);
 		document.addEventListener('mousemove', this.$onMousemove);
 		document.addEventListener('mouseup', this.$onMouseup);
 
-		this.element.dispatchEvent(DragEvent('drag-start', offset));
+		this.$dispatch('vd-dragstart', this.element, event);
 	}
 
 	$move(event) {
-		const offset = this.$setOffsetFromEvent(event);
+		this.$setOffsetFromEvent(event);
 
-		this.element.dispatchEvent(DragEvent('drag-move', offset));
+		if (this.getOption('withDrop')) {
+			this.$updateDragoverElement(event);
+		}
+
+		this.$dispatch('vd-drag', this.element, event);
 	}
 
 	$end(event) {
-		const offset = this.$setOffsetFromEvent(event);
+		this.element.style.zIndex = 0;
+		this.$setOffsetFromEvent(event);
 
-		this.element.dispatchEvent(DragEvent('drag-end', offset));
+		this.$dispatch('vd-dragend', this.element, event);
+
+		if (this.getOption('withDrop')) {
+			this.$dispatch('vd-drop', dragover, event);
+		}
+
+		dragover = document;
 	}
 
 	$cancel() {
@@ -139,11 +186,11 @@ export default class DraggableController extends Controller {
 	set({ x, y }) {
 		const style = this.element.style;
 		
-		if (this.$options.axis !== 'y') {
+		if (this.getOption('axis') !== 'y') {
 			style.left = `${x}px`;
 		}
 
-		if (this.$options.axis !== 'x') {
+		if (this.getOption('axis') !== 'x') {
 			style.top = `${y}px`;
 		}
 
@@ -158,7 +205,7 @@ export default class DraggableController extends Controller {
 			elementOrigin: this.position.element.origin
 		});
 
-		if (this.$options.constraint === 'parent') {
+		if (this.getOption('constraint') === 'parent') {
 			offset = constraintFilter({
 				originOffset,
 				parentElement: this.$offsetParent,
@@ -182,9 +229,9 @@ function clearSelection() {
 }
 
 function getElementFromPoint({ x, y }, { style }) {
-	style.display = 'none';
+	style.visibility = 'hidden';
 	const element = document.elementFromPoint(x, y) || null;
-	style.display = '';
+	style.visibility = 'visible';
 
 	return element;
 }

@@ -25,4 +25,10 @@ export default class Controller {
 
 		return this.$options[name];
 	}
+
+	initOptions(options) {
+		for (let name in options) {
+			this.setOption(name, options[name]);
+		}
+	}
 }
