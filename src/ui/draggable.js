@@ -10,21 +10,25 @@ function noOp() {
 
 function DefaultOptions() {
 	return {
-		handleRequired: false,
-		constraint: null,
+		handled: false,
+		constraint: false,
 		delay: 50,
 		threshold: 0,
 		axis: null,
 		dataFactory: noOp,
-		withDrop: true
+		droppable: false
 	};
 }
 
-function VdDragEvent(typeName, data, mouseEvent) {
+function VdDragEvent(typeName, data, mouseEvent, element) {
 	return Object.assign(new CustomEvent(typeName, {
 		bubbles: true,
 		cancelable: true,
-		detail: { data }
+		detail: {
+			data,
+			left: element.offsetLeft,
+			top: element.offsetTop,
+		}
 	}), {
 		clientX: mouseEvent.clientX,
 		clientY: mouseEvent.clientY,
@@ -58,7 +62,7 @@ export default class DraggableController extends Controller {
 				return this.$cancel();
 			}
 
-			if (this.getOption('handleRequired') && !event.__VD_HANDLE__) {
+			if (this.getOption('handled') && !event.__VD_HANDLE__) {
 				return;
 			}
 			
@@ -101,7 +105,8 @@ export default class DraggableController extends Controller {
 		const dragEvent = VdDragEvent(
 			typeName,
 			this.$dataFactory(this),
-			mouseEvent
+			mouseEvent,
+			element
 		);
 
 		element.dispatchEvent(dragEvent);
@@ -140,7 +145,7 @@ export default class DraggableController extends Controller {
 	$move(event) {
 		this.$setOffsetFromEvent(event);
 
-		if (this.getOption('withDrop')) {
+		if (this.getOption('droppable')) {
 			this.$updateDragoverElement(event);
 		}
 
@@ -153,7 +158,7 @@ export default class DraggableController extends Controller {
 
 		this.$dispatch('vd-dragend', this.element, event);
 
-		if (this.getOption('withDrop')) {
+		if (this.getOption('droppable')) {
 			this.$dispatch('vd-drop', dragover, event);
 		}
 
@@ -205,7 +210,7 @@ export default class DraggableController extends Controller {
 			elementOrigin: this.position.element.origin
 		});
 
-		if (this.getOption('constraint') === 'parent') {
+		if (this.getOption('constraint')) {
 			offset = constraintFilter({
 				originOffset,
 				parentElement: this.$offsetParent,

@@ -14,28 +14,20 @@
     </ul>
     {{pos}}
 
-    <test
-      vd-handle-required
+    <vd-ui
+      style="background-color: #f0f0f0"
       v-model="pos"
-      @vd-dock="dock($event)"
-      @vd-dock-query="query($event)"
-      @vd-drag-start="start($event)"
-      @vd-drag-move="move($event)"
-      @vd-drag-end="end($event)" />
-
-    <test
-      class="request"
-      :vd-drag-data="{abc:1}"
-      @vd-dock-query-respond="dockQueryRes($event)"
-      @vd-dock-respond="dockRes($event)"
-      @vd-drag-start="start($event)"
-      @vd-drag-move="move($event)"
-      @vd-drag-end="end($event)" />
+      axis="null"
+      constraint
+      :direction="direction"
+      resizable
+      handled
+      :droppable="droppable"
+      :draggable="draggable">牛逼<a v-vd-handle>口巴</a></vd-ui>
   </div>
 </template>
 
 <script>
-import Test from './Element';
 import mockWS from '../mock/workspace.json';
 
 export default {
@@ -44,11 +36,11 @@ export default {
       pos: {
         x: 0,
         y: 0
-      }
+      },
+      draggable: true,
+      droppable: false,
+      direction: [1, 1, 1, 1]
     }
-  },
-  components: {
-    Test
   },
   methods: {
     start(event) {

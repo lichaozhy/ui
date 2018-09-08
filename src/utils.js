@@ -20,17 +20,3 @@
 
 	window.CustomEvent = CustomEvent;
 }());
-
-export const STATE = {
-	IDLE: -1,
-	READY: 0,
-	MOVING: 1,
-};
-
-export function createDockQuery(typeName, data = {}) {
-	return new CustomEvent(typeName, {
-		bubbles: true,
-		cancelable: true,
-		detail: data
-	});
-}

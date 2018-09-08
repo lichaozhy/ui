@@ -1,13 +1,13 @@
 import Vue from 'vue';
-import App from './src/App';
-import { vdUiCore } from '../';
+import vdUiCore from '../';
 
 Vue.use(vdUiCore);
 
-const app = new Vue(App);
+import App from './src/App';
 
-app.$mount('#app');
+const $app = new Vue(App);
 
+$app.$mount('#app');
 
 import DraggableController from '../src/ui/draggable';
 import ResizableController from '../src/ui/resizable';
@@ -73,11 +73,15 @@ handle2.style.width = '20px';
 handle2.style.height = '20px';
 handle2.style.backgroundColor = 'red';
 
-const dc = new DraggableController(test);
+const dc = new DraggableController(test, {
+	droppable: true
+});
 dc.setOption('axis', null);
-dc.setOption('constraint', 'parent');
-dc.setOption('handleRequired', true);
+// dc.setOption('constraint', 'parent');
+dc.setOption('handled', true);
 
-const dc2 = new DraggableController(test2);
+const dc2 = new DraggableController(test2, {
+	droppable: true
+});
 // dc2.setOption('axis', 'x');
 dc2.setOption('constraint', 'parent');

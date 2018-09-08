@@ -2,14 +2,13 @@ import Controller from './utils/controller';
 
 const DEFAULT_OPTIONS = {
 	constraint: null,
-	handle: [true, true, true, true]
+	direction: [true, true, true, true]
 };
 
 const handleBaseStyle = {
 	position: 'absolute',
 	userSelect: 'none',
-	MsUserSelect: 'none',
-	backgroundColor: '#ccc',
+	MsUserSelect: 'none'
 };
 
 const handleStyleMapping = {
@@ -39,27 +38,46 @@ export default class ResizableController extends Controller {
 		super(element, DEFAULT_OPTIONS);
 		this.initOptions(options);
 
-		this.element.appendChild(
-			HandleFragment([1, 1, 1, 1], this.element)
-		);
+		this.$handleList = [];
+
+		this.updateHandle();
+	}
+
+	updateHandle() {
+		this.$handleList.forEach(handleElement => {
+			this.element.removeChild(handleElement);
+		});
+
+		const newHandles = HandleFragment(this.getOption('direction'), this.element);
+		
+		newHandles.forEach(handleElement => {
+			this.element.appendChild(handleElement);
+		});
+
+		this.$handleList = newHandles;
 	}
 
 	get() {
 		const { offsetHeight, offsetWidth } = this.element;
 
 		return {
-			x: offsetWidth,
-			y: offsetHeight
+			width: offsetWidth,
+			height: offsetHeight
 		};
 	}
 
-	set() {
+	set({ width, height }) {
 		const style = this.element.style;
 		
-		style.width = `${x}px`;
-		style.height = `${y}px`;
+		style.width = `${width}px`;
+		style.height = `${height}px`;
 
 		return this.get();
+	}
+
+	destroy() {
+		this.setOption('direction', []);
+		this.updateHandle();
 	}
 }
 
@@ -90,13 +108,24 @@ function encodeHandleIdList([ top, right, bottom, left ] = []) {
 	return handleIdList;
 }
 
+function ResizeEvent(typeName, host) {
+	return new CustomEvent(typeName, {
+		bubbles: true,
+		cancelable: true,
+		detail: {
+			width: host.offsetWidth,
+			height: host.offsetHeight
+		}
+	});
+}
+
 function handleStyle(handleId) {
 	return Object.assign({}, handleBaseStyle, handleStyleMapping[handleId]);
 }
 
 function HandleFragment(direction, host) {
 	const handleList = encodeHandleIdList(direction);
-	const fragment = document.createDocumentFragment();
+	const handelElementList = [];
 
 	handleList.forEach(id => {
 		const handle = document.createElement('div');
@@ -118,25 +147,31 @@ function HandleFragment(direction, host) {
 				return;
 			}
 
+			event.stopPropagation();
+
 			origin.pointer = { x: event.clientX, y: event.clientY };
 			origin.host.offset = { x: host.offsetLeft, y: host.offsetTop };
 			origin.host.size = { width: host.offsetWidth, height: host.offsetHeight };
 
 			document.addEventListener('mousemove', onMousemove);
 			resizing = true;
+			
+			host.dispatchEvent(ResizeEvent('vd-resizestart', host));
 		});
 
 		function onMousemove(event) {
 			updateHostRect(host, origin, event, handleDeltaMapping[id]);
+			host.dispatchEvent(ResizeEvent('vd-resize', host));
 		}
 
 		document.addEventListener('mouseup', () => {
 			document.removeEventListener('mousemove', onMousemove);
 			resizing = false;
+			host.dispatchEvent(ResizeEvent('vd-resizeend', host));
 		});
 
-		fragment.appendChild(handle);
+		handelElementList.push(handle);
 	});
 
-	return fragment;
+	return handelElementList;
 }

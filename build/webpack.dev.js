@@ -23,6 +23,6 @@ module.exports = Object.assign({}, webpackBase, {
 	},
 	serve: {
 		// port: 8081,
-		// host: config.serve.host,
+		hot: false
 	}
 });
