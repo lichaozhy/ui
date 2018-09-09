@@ -24,6 +24,15 @@ export default {
 		}
 	},
 	methods: {
+		updataElement() {
+			const { x, y, width, height } = this.model;
+			const { style } = this.$el;
+
+			style.left = x + 'px';
+			style.top = y + 'px';
+			style.width = width + 'px';
+			style.height = height + 'px';
+		},
 		updateModel() {
 			this.model = {
 				x: this.$el.offsetLeft,
@@ -46,8 +55,8 @@ export default {
 				delay: this.delay,
 				axis: this.axis,
 				droppable: this.droppable,
-				dataFactory() {
-					return 'test';
+				dataFactory: () => {
+					return this.data;
 				},
 			});
 		}
@@ -58,12 +67,36 @@ export default {
 				direction: this.direction
 			});
 		}
+
+		if (this.value) {
+			const { x, y, width, height } = this.value;
+
+			this.model = { x, y, width, height };
+		}
 		
+		this.updataElement();
 		this.updateModel();
 	},
 	watch: {
-		value({ x = 0, y = 0, width = 0, height = 0 } = {}) {
-			this.model = { x, y, width, height };
+		model: {
+			handler({ x, y, height, width }) {
+				this.$el.style.left = x + 'px';
+				this.$el.style.top = y + 'px';
+			},
+			deep: true
+		},
+		value({
+			x = this.model.x,
+			y = this.model.y,
+			width = this.model.width,
+			height = this.model.height
+		} = {}) {
+			this.model.x = x;
+			this.model.y = y;
+			this.model.width = width;
+			this.model.height = height;
+
+			this.updataElement();
 		},
 		resizable(enabled, origin) {
 			if (enabled === origin) {
@@ -144,7 +177,6 @@ export default {
 				return [1, 1, 1, 1];
 			}
 		},
-		
 		data: {
 			default() {
 				return {};

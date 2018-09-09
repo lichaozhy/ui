@@ -133,7 +133,6 @@ export default class DraggableController extends Controller {
 		element.origin = getElementOffsetPosition(this.element);
 
 		pointer.origin = getPointerClientPosition(event);
-		this.element.style.zIndex = Number.MAX_SAFE_INTEGER;
 
 		this.element.addEventListener('mousemove', this.$onMousemove);
 		document.addEventListener('mousemove', this.$onMousemove);
@@ -153,7 +152,6 @@ export default class DraggableController extends Controller {
 	}
 
 	$end(event) {
-		this.element.style.zIndex = 0;
 		this.$setOffsetFromEvent(event);
 
 		this.$dispatch('vd-dragend', this.element, event);
