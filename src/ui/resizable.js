@@ -154,6 +154,7 @@ function HandleFragment(direction, host) {
 			origin.host.size = { width: host.offsetWidth, height: host.offsetHeight };
 
 			document.addEventListener('mousemove', onMousemove);
+			document.addEventListener('mouseup', onMouseup);
 			resizing = true;
 			
 			host.dispatchEvent(ResizeEvent('vd-resizestart', host));
@@ -164,11 +165,16 @@ function HandleFragment(direction, host) {
 			host.dispatchEvent(ResizeEvent('vd-resize', host));
 		}
 
-		document.addEventListener('mouseup', () => {
+		function onMouseup() {
 			document.removeEventListener('mousemove', onMousemove);
+			document.removeEventListener('mouseup', onMouseup);
+
+			if (resizing) {
+				host.dispatchEvent(ResizeEvent('vd-resizeend', host));
+			}
+
 			resizing = false;
-			host.dispatchEvent(ResizeEvent('vd-resizeend', host));
-		});
+		}
 
 		handelElementList.push(handle);
 	});

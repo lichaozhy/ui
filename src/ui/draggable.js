@@ -66,7 +66,7 @@ export default class DraggableController extends Controller {
 				return;
 			}
 			
-			event.stopPropagation();
+			// event.stopPropagation();
 			
 			this.$state = STATE.READY;
 			this.$timer = setTimeout(() => {
